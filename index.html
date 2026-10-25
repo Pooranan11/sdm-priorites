@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Priorités SDM</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #f0f2f5;
+    --border: #dce0e6;
+    --text: #1b1f24;
+    --muted: #5b6470;
+    --accent: #2453b8;
+    --accent-text: #ffffff;
+    --danger: #b42318;
+    --danger-bg: #fdeceb;
+    --info-bg: #eaf1fd;
+    --q1: #c62828; --q1-bg: #fdeeee;
+    --q2: #a85f00; --q2-bg: #fff4e2;
+    --q3: #1f5fbf; --q3-bg: #e9f1fc;
+    --q4: #5f6b7a; --q4-bg: #eef0f3;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06);
+    --radius: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111316;
+      --surface: #1a1d22;
+      --surface-2: #22262c;
+      --border: #313741;
+      --text: #e5e7ea;
+      --muted: #9aa3ae;
+      --accent: #7ea6ff;
+      --accent-text: #0d1424;
+      --danger: #ff8a80;
+      --danger-bg: #3a1d1c;
+      --info-bg: #1b2840;
+      --q1: #ff7f7f; --q1-bg: #341c1e;
+      --q2: #f2b45c; --q2-bg: #352914;
+      --q3: #7fb0ff; --q3-bg: #18273f;
+      --q4: #a5afbb; --q4-bg: #24282e;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+  button, select, input { font: inherit; color: inherit; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* En-tête */
+  header.top { background: var(--surface); border-bottom: 1px solid var(--border); }
+  .top-inner { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; padding-block: 14px; }
+  h1 { font-size: 1.25rem; margin: 0; letter-spacing: -.01em; }
+  .source { color: var(--muted); font-size: .875rem; margin-top: 2px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn {
+    border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
+    padding: 7px 14px; cursor: pointer; font-weight: 500; white-space: nowrap;
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn:focus-visible, select:focus-visible, input:focus-visible, .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Bandeaux */
+  .banner { margin-top: 16px; padding: 10px 14px; border-radius: var(--radius); border: 1px solid var(--border); font-size: .9rem; display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+  .banner.example { background: var(--q2-bg); border-color: color-mix(in srgb, var(--q2) 35%, transparent); }
+  .banner.error { background: var(--danger-bg); border-color: color-mix(in srgb, var(--danger) 40%, transparent); color: var(--text); }
+  .banner.info { background: var(--info-bg); }
+  .banner strong { font-weight: 600; }
+  .banner .close { background: none; border: 0; cursor: pointer; color: var(--muted); padding: 0 4px; font-size: 1.1rem; line-height: 1; }
+  [hidden] { display: none !important; }
+
+  /* Résumé */
+  .summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; box-shadow: var(--shadow); border-top: 3px solid var(--border); }
+  .stat .n { font-size: 1.75rem; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.15; }
+  .stat .l { color: var(--muted); font-size: .825rem; }
+  .stat.s-now { border-top-color: var(--q1); }
+  .stat.s-now .n { color: var(--q1); }
+  .stat.s-plan { border-top-color: var(--q2); }
+  .stat.s-late { border-top-color: var(--danger); }
+  .stat.s-late .n { color: var(--danger); }
+  .stat.s-wait { border-top-color: var(--q3); }
+  .stat.s-done { border-top-color: var(--q4); }
+
+  /* Barre d'outils */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; margin: 20px 0 12px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface); }
+  .seg button { border: 0; background: transparent; padding: 7px 16px; cursor: pointer; font-weight: 500; }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+  .field { display: inline-flex; gap: 8px; align-items: center; font-size: .9rem; }
+  select { border: 1px solid var(--border); background: var(--surface); border-radius: 6px; padding: 6px 10px; max-width: 100%; }
+  input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
+
+  /* Matrice */
+  .matrix { display: grid; grid-template-columns: 28px 1fr 1fr; grid-template-rows: auto auto auto; gap: 10px; }
+  .axis-x { text-align: center; font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .axis-y { display: flex; align-items: center; justify-content: center; }
+  .axis-y span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .quad { border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); min-height: 160px; display: flex; flex-direction: column; overflow: hidden; }
+  .quad-head { padding: 10px 14px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; border-bottom: 1px solid var(--border); }
+  .quad-head h2 { margin: 0; font-size: 1rem; }
+  .quad-head .sub { color: var(--muted); font-size: .8rem; font-weight: 400; display: block; }
+  .count { font-variant-numeric: tabular-nums; font-weight: 650; font-size: 1.1rem; }
+  .quad .list { padding: 10px; display: grid; gap: 8px; align-content: start; }
+  .quad.q1 { border-color: color-mix(in srgb, var(--q1) 45%, var(--border)); }
+  .quad.q1 .quad-head { background: var(--q1-bg); } .quad.q1 h2, .quad.q1 .count { color: var(--q1); }
+  .quad.q2 { border-color: color-mix(in srgb, var(--q2) 45%, var(--border)); }
+  .quad.q2 .quad-head { background: var(--q2-bg); } .quad.q2 h2, .quad.q2 .count { color: var(--q2); }
+  .quad.q3 { border-color: color-mix(in srgb, var(--q3) 45%, var(--border)); }
+  .quad.q3 .quad-head { background: var(--q3-bg); } .quad.q3 h2, .quad.q3 .count { color: var(--q3); }
+  .quad.q4 .quad-head { background: var(--q4-bg); } .quad.q4 h2, .quad.q4 .count { color: var(--q4); }
+  .empty { color: var(--muted); font-size: .875rem; padding: 6px 4px; }
+
+  .done-section { margin-top: 16px; }
+  .done-section h2 { font-size: 1rem; margin: 0 0 8px; color: var(--muted); }
+  .done-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+
+  /* Kanban */
+  .kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+  .col { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; min-width: 0; }
+  .col-head { padding: 10px 12px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; }
+  .col-head .count { font-size: 1rem; color: var(--muted); }
+  .col .list { padding: 0 8px 8px; display: grid; gap: 8px; align-content: start; }
+
+  /* Cartes */
+  .card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--q4); border-radius: 6px; padding: 9px 11px; box-shadow: var(--shadow); min-width: 0; }
+  .card.q1 { border-left-color: var(--q1); }
+  .card.q2 { border-left-color: var(--q2); }
+  .card.q3 { border-left-color: var(--q3); }
+  .card.q4 { border-left-color: var(--q4); }
+  .card.is-done { opacity: .7; }
+  .card.is-done .card-title { text-decoration: line-through; text-decoration-color: var(--muted); }
+  .card-top { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 4px; font-size: .8rem; }
+  .card-title { font-size: .95rem; font-weight: 600; margin: 0; overflow-wrap: anywhere; }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--muted); font-size: .8rem; margin-top: 4px; }
+  .meta span { overflow-wrap: anywhere; }
+  .comment { color: var(--muted); font-size: .8rem; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .tag { display: inline-block; border-radius: 4px; padding: 1px 6px; font-weight: 600; font-size: .75rem; line-height: 1.4; border: 1px solid var(--border); }
+  .prio { background: var(--surface-2); }
+  .prio.p1 { background: var(--q1); border-color: var(--q1); color: var(--surface); }
+  .prio.p2 { background: var(--q1-bg); border-color: color-mix(in srgb, var(--q1) 40%, transparent); color: var(--q1); }
+  .due { color: var(--muted); font-weight: 500; }
+  .due.soon { color: var(--q2); font-weight: 600; }
+  .due.overdue { color: var(--danger); font-weight: 650; }
+  .flag { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); background: var(--danger-bg); }
+  .qtag { margin-top: 6px; }
+  .qtag.q1 { color: var(--q1); background: var(--q1-bg); border-color: transparent; }
+  .qtag.q2 { color: var(--q2); background: var(--q2-bg); border-color: transparent; }
+  .qtag.q3 { color: var(--q3); background: var(--q3-bg); border-color: transparent; }
+  .qtag.q4 { color: var(--q4); background: var(--q4-bg); border-color: transparent; }
+
+  /* Pied de page */
+  footer { margin: 32px 0 24px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
+  footer h2 { font-size: .95rem; color: var(--text); margin: 0 0 8px; }
+  footer ul, footer ol { margin: 4px 0 10px; padding-left: 20px; }
+  footer li { margin: 2px 0; }
+  footer .privacy { margin-top: 12px; }
+
+  /* Glisser-déposer */
+  .drop {
+    position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+    background: color-mix(in srgb, var(--bg) 85%, transparent); pointer-events: none;
+  }
+  .drop div { border: 2px dashed var(--accent); border-radius: 12px; padding: 40px 48px; background: var(--surface); font-weight: 600; font-size: 1.1rem; margin: 16px; text-align: center; }
+
+  @media (max-width: 900px) {
+    .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .matrix { grid-template-columns: 1fr; }
+    .axis-x, .axis-y, .corner { display: none; }
+    .kanban { grid-auto-flow: row; grid-auto-columns: auto; overflow-x: visible; }
+    .toolbar { gap: 10px; }
+    .field select { flex: 1; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <div>
+      <h1>Priorités SDM</h1>
+      <div class="source" id="source">Données d'exemple</div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="btnLoad">Charger mon Excel</button>
+      <button type="button" class="btn" id="btnClear">Effacer les données</button>
+      <input type="file" id="fileInput" accept=".xlsx,.xlsm,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="banner example" id="exampleBanner">
+    <span><strong>Données d'exemple.</strong> Ces actions sont fictives. Chargez votre fichier Excel (bouton ou glisser-déposer n'importe où sur la page) pour afficher vos priorités.</span>
+  </div>
+  <div class="banner" id="message" role="alert" hidden>
+    <span id="messageText"></span>
+    <button type="button" class="close" id="messageClose" aria-label="Fermer le message">&times;</button>
+  </div>
+
+  <section class="summary" aria-label="Résumé">
+    <div class="stat s-now"><div class="n" id="cNow">0</div><div class="l">À faire maintenant</div></div>
+    <div class="stat s-plan"><div class="n" id="cPlan">0</div><div class="l">À planifier</div></div>
+    <div class="stat s-late"><div class="n" id="cLate">0</div><div class="l">En retard</div></div>
+    <div class="stat s-wait"><div class="n" id="cWait">0</div><div class="l">En attente fournisseur</div></div>
+    <div class="stat s-done"><div class="n" id="cDone">0</div><div class="l">Terminées</div></div>
+  </section>
+
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="Vue">
+      <button type="button" data-view="matrix" aria-pressed="true">Matrice</button>
+      <button type="button" data-view="kanban" aria-pressed="false">Kanban</button>
+    </div>
+    <label class="field">Famille
+      <select id="familyFilter"><option value="">Toutes les familles</option></select>
+    </label>
+    <label class="field"><input type="checkbox" id="showDone"> Afficher les terminées</label>
+  </div>
+
+  <div id="view"></div>
+
+  <footer>
+    <h2>Règles de calcul</h2>
+    <ul>
+      <li><strong>Urgent</strong> : échéance dans 2 jours ou moins (ou dépassée), ou priorité P1 / P2, ou Bloquant = Oui.</li>
+      <li><strong>Important</strong> : Impact client = Oui, ou Visible manager = Oui, ou priorité P1 / P2, ou famille Incidents, Problem, Fournisseurs ou Sécurité / CVE.</li>
+    </ul>
+    <ol>
+      <li><strong>Faire maintenant</strong> : urgent et important.</li>
+      <li><strong>Planifier</strong> : important, pas urgent.</li>
+      <li><strong>Déléguer / regrouper</strong> : urgent, pas important.</li>
+      <li><strong>Reporter / abandonner</strong> : ni urgent ni important.</li>
+    </ol>
+    <p>Les actions au statut « Fait » sortent de la matrice. Les colonnes Urgent, Important et Quadrant du fichier Excel sont ignorées : tout est recalculé ici, à la date du jour.</p>
+    <p class="privacy">Confidentialité : le fichier est lu uniquement dans votre navigateur. Aucune donnée n'est envoyée sur un serveur ; elles sont seulement mémorisées dans le stockage local de ce navigateur, jusqu'à « Effacer les données ».</p>
+  </footer>
+</main>
+
+<div class="drop" id="drop" hidden><div>Déposez votre fichier Excel ici</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script id="app">
+"use strict";
+
+/* ---------- Logique métier (sans DOM, testable) ---------- */
+const SDM = (() => {
+  const norm = (s) => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase().replace(/\s+/g, " ").trim();
+  const normFamily = (s) => norm(s).replace(/\s*\/\s*/g, "/");
+
+  // Champ -> en-têtes acceptés (normalisés)
+  const FIELDS = {
+    id: ["id"],
+    action: ["action"],
+    famille: ["famille"],
+    interlocuteur: ["interlocuteur"],
+    echeance: ["echeance"],
+    priorite: ["priorite"],
+    bloquant: ["bloquant"],
+    impact: ["impact client"],
+    visible: ["visible manager"],
+    statut: ["statut"],
+    commentaire: ["commentaire", "commentaires"],
+  };
+  const LABELS = {
+    action: "Action", famille: "Famille", echeance: "Échéance", priorite: "Priorité",
+    bloquant: "Bloquant", impact: "Impact client", visible: "Visible manager", statut: "Statut",
+  };
+  const REQUIRED = ["action", "famille", "echeance", "priorite", "bloquant", "impact", "visible", "statut"];
+
+  const STATUSES = ["À faire", "En cours", "En attente fournisseur", "Fait"];
+  const FAMILIES = ["Run quotidien", "Incidents", "Problem", "Changes", "Fournisseurs",
+    "Sécurité / CVE", "Gouvernance", "Amélioration", "Administratif"];
+  const IMPORTANT_FAMILIES = new Set(["incidents", "problem", "fournisseurs", "securite/cve"]);
+  const QUADRANTS = {
+    1: { name: "Faire maintenant", sub: "Urgent et important" },
+    2: { name: "Planifier", sub: "Important, pas urgent" },
+    3: { name: "Déléguer / regrouper", sub: "Urgent, pas important" },
+    4: { name: "Reporter / abandonner", sub: "Ni urgent ni important" },
+  };
+
+  const pad = (n) => String(n).padStart(2, "0");
+  const iso = (y, m, d) => {
+    const dt = new Date(y, m - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+    return `${y}-${pad(m)}-${pad(d)}`;
+  };
+  const fromIso = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const startOfToday = () => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); };
+
+  function fromSerial(n) {
+    const p = XLSX.SSF.parse_date_code(n);
+    return p && p.y ? iso(p.y, p.m, p.d) : null;
+  }
+
+  // Retourne "AAAA-MM-JJ", null si vide, undefined si illisible
+  function parseDate(v) {
+    if (v === null || v === undefined || v === "") return null;
+    if (typeof v === "number" && isFinite(v)) return fromSerial(v) ?? undefined;
+    if (v instanceof Date && !isNaN(v)) return iso(v.getFullYear(), v.getMonth() + 1, v.getDate());
+    const s = String(v).trim();
+    if (!s || s === "-") return null;
+    let m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/);
+    if (m) { let y = +m[3]; if (y < 100) y += 2000; return iso(y, +m[2], +m[1]) ?? undefined; }
+    m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return iso(+m[1], +m[2], +m[3]) ?? undefined;
+    if (/^\d+(\.\d+)?$/.test(s)) return fromSerial(+s) ?? undefined;
+    return undefined;
+  }
+
+  const yes = (v) => v === true || ["oui", "o", "yes", "y", "x", "vrai", "true", "1"].includes(norm(v));
+
+  function normPriority(v) {
+    const s = String(v ?? "").toUpperCase();
+    const m = s.match(/^\s*P\s*([1-5])\b/) || s.match(/^\s*([1-5])\s*$/);
+    return m ? "P" + m[1] : "-";
+  }
+
+  function normStatus(v) {
+    const n = norm(v);
+    if (n === "fait" || n === "termine" || n === "terminee" || n === "clos") return "Fait";
+    if (n.startsWith("en attente")) return "En attente fournisseur";
+    if (n === "en cours") return "En cours";
+    return "À faire";
+  }
+
+  function canonicalFamily(v) {
+    const n = normFamily(v);
+    return FAMILIES.find((f) => normFamily(f) === n) || String(v ?? "").trim();
+  }
+
+  function parseWorkbook(wb) {
+    const sheetName = wb.SheetNames.find((n) => norm(n) === "actions");
+    if (!sheetName) {
+      throw new Error(`Onglet « Actions » introuvable. Onglets présents : ${wb.SheetNames.join(", ") || "aucun"}.`);
+    }
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: true, defval: "", blankrows: false });
+
+    // En-têtes attendus en ligne 1 ; on tolère quelques lignes de titre au-dessus.
+    let h = rows.slice(0, 10).findIndex((r) => {
+      const n = r.map(norm);
+      return n.includes("action") && n.includes("statut");
+    });
+    if (h < 0) h = 0;
+    const headers = (rows[h] || []).map(norm);
+    const col = {};
+    for (const [field, aliases] of Object.entries(FIELDS)) {
+      col[field] = headers.findIndex((x) => aliases.includes(x));
+    }
+    const missing = REQUIRED.filter((f) => col[f] < 0).map((f) => LABELS[f]);
+    if (missing.length) {
+      throw new Error(`Structure non reconnue : colonne(s) manquante(s) dans l'onglet « ${sheetName} » : ${missing.join(", ")}. ` +
+        "La ligne 1 doit contenir les en-têtes ID, Action, Famille, Interlocuteur, Échéance, Priorité, Bloquant, Impact client, Visible manager, Statut, Commentaire.");
+    }
+
+    const get = (r, f) => (col[f] >= 0 ? r[col[f]] : "");
+    const str = (v) => String(v ?? "").trim();
+    const actions = [];
+    const badDates = [];
+    for (let i = h + 1; i < rows.length; i++) {
+      const r = rows[i];
+      const action = str(get(r, "action"));
+      if (!action || norm(action).startsWith("(exemple)")) continue;
+      let echeance = parseDate(get(r, "echeance"));
+      if (echeance === undefined) { badDates.push(i + 1); echeance = null; }
+      actions.push({
+        id: str(get(r, "id")) || String(i + 1),
+        action,
+        famille: canonicalFamily(get(r, "famille")),
+        interlocuteur: str(get(r, "interlocuteur")),
+        echeance,
+        priorite: normPriority(get(r, "priorite")),
+        bloquant: yes(get(r, "bloquant")),
+        impact: yes(get(r, "impact")),
+        visible: yes(get(r, "visible")),
+        statut: normStatus(get(r, "statut")),
+        commentaire: str(get(r, "commentaire")),
+      });
+    }
+    const warnings = [];
+    if (badDates.length) {
+      warnings.push(`Échéance illisible ignorée (ligne${badDates.length > 1 ? "s" : ""} ${badDates.join(", ")}). Format attendu : date Excel ou jj/mm/aaaa.`);
+    }
+    if (!actions.length) warnings.push("Aucune action trouvée dans l'onglet « Actions ».");
+    return { actions, warnings };
+  }
+
+  const daysUntil = (isoDate, today) => Math.round((fromIso(isoDate) - today) / 86400000);
+
+  function classify(a, today) {
+    const days = a.echeance ? daysUntil(a.echeance, today) : null;
+    const p12 = a.priorite === "P1" || a.priorite === "P2";
+    const urgent = (days !== null && days <= 2) || p12 || a.bloquant;
+    const important = a.impact || a.visible || p12 || IMPORTANT_FAMILIES.has(normFamily(a.famille));
+    const quadrant = urgent && important ? 1 : important ? 2 : urgent ? 3 : 4;
+    return { ...a, days, urgent, important, quadrant, done: a.statut === "Fait" };
+  }
+
+  const prioRank = (p) => (p === "-" ? 9 : +p.slice(1));
+  const byDue = (a, b) =>
+    (a.days ?? Infinity) - (b.days ?? Infinity) || prioRank(a.priorite) - prioRank(b.priorite) ||
+    a.action.localeCompare(b.action, "fr");
+  const byQuadrantThenDue = (a, b) => a.quadrant - b.quadrant || byDue(a, b);
+
+  function summarize(items) {
+    const open = items.filter((a) => !a.done);
+    return {
+      now: open.filter((a) => a.quadrant === 1).length,
+      plan: open.filter((a) => a.quadrant === 2).length,
+      late: open.filter((a) => a.days !== null && a.days < 0).length,
+      wait: open.filter((a) => a.statut === "En attente fournisseur").length,
+      done: items.length - open.length,
+    };
+  }
+
+  function exampleActions(today) {
+    const d = (n) => { const t = new Date(today); t.setDate(t.getDate() + n); return iso(t.getFullYear(), t.getMonth() + 1, t.getDate()); };
+    const A = (id, action, famille, interlocuteur, due, priorite, bloquant, impact, visible, statut, commentaire = "") =>
+      ({ id: String(id), action, famille, interlocuteur, echeance: due === null ? null : d(due), priorite, bloquant, impact, visible, statut, commentaire });
+    return [
+      A(1, "Rétablir le lien MPLS du site de Lyon", "Incidents", "Opérateur télécom", 0, "P1", true, true, true, "En cours", "Ticket opérateur ouvert, relance toutes les 2 h"),
+      A(2, "Valider le plan de remédiation CVE firewall", "Sécurité / CVE", "Équipe sécurité", -2, "P2", false, false, true, "À faire"),
+      A(3, "Relancer le fournisseur sur le RMA des switchs", "Fournisseurs", "Fournisseur matériel", 1, "P3", false, false, false, "En attente fournisseur"),
+      A(4, "Préparer le comité de pilotage mensuel", "Gouvernance", "Manager", 6, "P3", false, false, true, "À faire"),
+      A(5, "Analyse de cause racine des coupures Wi-Fi", "Problem", "Exploitation", 10, "P3", false, false, false, "En cours"),
+      A(6, "Mettre à jour la documentation des VLAN", "Amélioration", "", 20, "P4", false, false, false, "À faire"),
+      A(7, "Valider le CAB de jeudi", "Changes", "Change manager", 2, "P3", false, false, false, "À faire"),
+      A(8, "Saisir les feuilles de temps", "Administratif", "", 1, "-", false, false, false, "À faire"),
+      A(9, "Revue des alertes de supervision", "Run quotidien", "NOC", null, "P4", false, false, false, "À faire"),
+      A(10, "Suivi des pénalités SLA du trimestre", "Fournisseurs", "Achats", 14, "P3", false, true, false, "En attente fournisseur"),
+      A(11, "Clôturer le change de migration DNS", "Changes", "Exploitation", -1, "P3", false, false, false, "Fait"),
+    ];
+  }
+
+  return { norm, parseDate, parseWorkbook, classify, summarize, byDue, byQuadrantThenDue,
+    exampleActions, startOfToday, fromIso, STATUSES, FAMILIES, QUADRANTS };
+})();
+
+/* ---------- Interface ---------- */
+if (typeof document !== "undefined") (() => {
+  const KEY_DATA = "sdm-priorites:data";
+  const KEY_VIEW = "sdm-priorites:view";
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } },
+    del(k) { try { localStorage.removeItem(k); } catch { /* indisponible */ } },
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmtDate = (d) => d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+  const state = { data: null, view: "matrix", family: "", showDone: false };
+
+  try {
+    const saved = JSON.parse(store.get(KEY_DATA) || "null");
+    if (saved && Array.isArray(saved.actions)) state.data = saved;
+  } catch { store.del(KEY_DATA); }
+  if (store.get(KEY_VIEW) === "kanban") state.view = "kanban";
+
+  function showMessage(text, type = "error") {
+    $("messageText").textContent = text;
+    $("message").className = "banner " + type;
+    $("message").hidden = false;
+  }
+  const hideMessage = () => { $("message").hidden = true; };
+
+  function dueLabel(a) {
+    if (a.days === null) return { text: "Sans échéance", cls: "" };
+    const date = fmtDate(SDM.fromIso(a.echeance));
+    if (a.done) return { text: date, cls: "" };
+    if (a.days < 0) return { text: `En retard de ${-a.days} j (${date})`, cls: "overdue" };
+    if (a.days === 0) return { text: "Aujourd'hui", cls: "soon" };
+    if (a.days === 1) return { text: "Demain", cls: "soon" };
+    return { text: date, cls: a.days <= 2 ? "soon" : "" };
+  }
+
+  function card(a, withQuadrant) {
+    const due = dueLabel(a);
+    const prio = a.priorite === "-" ? "" : `<span class="tag prio ${a.priorite.toLowerCase()}" title="Priorité">${a.priorite}</span>`;
+    const meta = [a.famille, a.interlocuteur].filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("");
+    return `<article class="card q${a.quadrant}${a.done ? " is-done" : ""}">
+      <div class="card-top">${prio}<span class="due ${due.cls}">${esc(due.text)}</span>${a.bloquant && !a.done ? '<span class="tag flag">Bloquant</span>' : ""}</div>
+      <h3 class="card-title">${esc(a.action)}</h3>
+      ${meta ? `<div class="meta">${meta}</div>` : ""}
+      ${a.commentaire ? `<div class="comment" title="${esc(a.commentaire)}">${esc(a.commentaire)}</div>` : ""}
+      ${withQuadrant ? `<span class="tag qtag q${a.quadrant}">${a.quadrant} · ${esc(SDM.QUADRANTS[a.quadrant].name)}</span>` : ""}
+    </article>`;
+  }
+
+  const list = (items, withQuadrant) =>
+    items.length ? items.map((a) => card(a, withQuadrant)).join("") : '<div class="empty">Aucune action</div>';
+
+  function renderMatrix(items) {
+    const open = items.filter((a) => !a.done);
+    const quad = (q) => {
+      const its = open.filter((a) => a.quadrant === q).sort(SDM.byDue);
+      const Q = SDM.QUADRANTS[q];
+      return `<section class="quad q${q}" aria-label="${esc(Q.name)}">
+        <div class="quad-head"><h2>${q}. ${esc(Q.name)}<span class="sub">${esc(Q.sub)}</span></h2><span class="count">${its.length}</span></div>
+        <div class="list">${list(its, false)}</div>
+      </section>`;
+    };
+    let html = `<div class="matrix">
+      <div class="corner"></div><div class="axis-x">Urgent</div><div class="axis-x">Pas urgent</div>
+      <div class="axis-y"><span>Important</span></div>${quad(1)}${quad(2)}
+      <div class="axis-y"><span>Pas important</span></div>${quad(3)}${quad(4)}
+    </div>`;
+    if (state.showDone) {
+      const done = items.filter((a) => a.done).sort(SDM.byDue);
+      html += `<section class="done-section"><h2>Terminées (${done.length})</h2><div class="done-grid">${list(done, true)}</div></section>`;
+    }
+    return html;
+  }
+
+  function renderKanban(items) {
+    const statuses = SDM.STATUSES.filter((s) => s !== "Fait" || state.showDone);
+    return `<div class="kanban">${statuses.map((s) => {
+      const its = items.filter((a) => a.statut === s).sort(SDM.byQuadrantThenDue);
+      return `<section class="col" aria-label="${esc(s)}">
+        <div class="col-head"><span>${esc(s)}</span><span class="count">${its.length}</span></div>
+        <div class="list">${list(its, true)}</div>
+      </section>`;
+    }).join("")}</div>`;
+  }
+
+  function render() {
+    const today = SDM.startOfToday();
+    const isExample = !state.data;
+    const source = isExample ? SDM.exampleActions(today) : state.data.actions;
+    const items = source.map((a) => SDM.classify(a, today));
+
+    $("exampleBanner").hidden = !isExample;
+    if (isExample) {
+      $("source").textContent = "Données d'exemple (aucun fichier chargé)";
+    } else {
+      const at = new Date(state.data.loadedAt);
+      $("source").textContent = `${state.data.fileName} · chargé le ${fmtDate(at)} à ${at.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+    $("btnClear").hidden = isExample;
+
+    // Filtre famille : familles standard + celles présentes dans le fichier
+    const fams = [...SDM.FAMILIES];
+    for (const a of items) if (a.famille && !fams.includes(a.famille)) fams.push(a.famille);
+    if (state.family && !fams.includes(state.family)) state.family = "";
+    $("familyFilter").innerHTML = '<option value="">Toutes les familles</option>' +
+      fams.map((f) => `<option value="${esc(f)}"${f === state.family ? " selected" : ""}>${esc(f)}</option>`).join("");
+
+    const filtered = state.family ? items.filter((a) => a.famille === state.family) : items;
+    const s = SDM.summarize(filtered);
+    $("cNow").textContent = s.now;
+    $("cPlan").textContent = s.plan;
+    $("cLate").textContent = s.late;
+    $("cWait").textContent = s.wait;
+    $("cDone").textContent = s.done;
+
+    document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
+    $("view").innerHTML = state.view === "kanban" ? renderKanban(filtered) : renderMatrix(filtered);
+  }
+
+  async function loadFile(file) {
+    hideMessage();
+    if (!file) return;
+    if (!/\.(xlsx|xlsm|xls)$/i.test(file.name)) {
+      showMessage(`« ${file.name} » n'est pas un fichier Excel (.xlsx attendu).`);
+      return;
+    }
+    if (typeof XLSX === "undefined") {
+      showMessage("La bibliothèque de lecture Excel (SheetJS) n'a pas pu être chargée. Vérifiez votre connexion Internet puis rechargez la page.");
+      return;
+    }
+    let result;
+    try {
+      const wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: "array", cellDates: false });
+      result = SDM.parseWorkbook(wb);
+    } catch (e) {
+      showMessage(`Impossible de lire « ${file.name} ». ${e && e.message ? e.message : e}`);
+      return;
+    }
+    state.data = { fileName: file.name, loadedAt: new Date().toISOString(), actions: result.actions };
+    const saved = store.set(KEY_DATA, JSON.stringify(state.data));
+    const notes = [...result.warnings];
+    if (!saved) notes.push("Les données n'ont pas pu être mémorisées dans ce navigateur : il faudra recharger le fichier à la prochaine ouverture.");
+    if (notes.length) showMessage(notes.join(" "), "info");
+    render();
+  }
+
+  // Événements
+  $("btnLoad").addEventListener("click", () => $("fileInput").click());
+  $("fileInput").addEventListener("change", (e) => { loadFile(e.target.files[0]); e.target.value = ""; });
+  $("btnClear").addEventListener("click", () => {
+    if (!confirm("Effacer les données mémorisées dans ce navigateur ?")) return;
+    store.del(KEY_DATA);
+    store.del(KEY_VIEW);
+    state.data = null;
+    hideMessage();
+    render();
+  });
+  $("messageClose").addEventListener("click", hideMessage);
+  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+    state.view = b.dataset.view;
+    store.set(KEY_VIEW, state.view);
+    render();
+  }));
+  $("familyFilter").addEventListener("change", (e) => { state.family = e.target.value; render(); });
+  $("showDone").addEventListener("change", (e) => { state.showDone = e.target.checked; render(); });
+
+  // Glisser-déposer n'importe où
+  let dragDepth = 0;
+  const hasFiles = (e) => e.dataTransfer && [...e.dataTransfer.types].includes("Files");
+  window.addEventListener("dragenter", (e) => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; $("drop").hidden = false; });
+  window.addEventListener("dragover", (e) => { if (hasFiles(e)) e.preventDefault(); });
+  window.addEventListener("dragleave", () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("drop").hidden = true; });
+  window.addEventListener("drop", (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    dragDepth = 0;
+    $("drop").hidden = true;
+    loadFile(e.dataTransfer.files[0]);
+  });
+
+  // Recalcul au changement de jour si l'onglet reste ouvert
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
+
+  render();
+})();
+</script>
+</body>
+</html>

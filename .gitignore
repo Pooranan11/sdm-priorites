@@ -1,0 +1,6 @@
+# Données confidentielles : ne jamais versionner les fichiers Excel
+*.xlsx
+*.xlsm
+*.xls
+~$*
+.DS_Store
