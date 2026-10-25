@@ -17,6 +17,7 @@
     --muted: #5b6470;
     --accent: #2453b8;
     --accent-text: #ffffff;
+    --ok: #2e7d32;
     --danger: #b42318;
     --danger-bg: #fdeceb;
     --info-bg: #eaf1fd;
@@ -37,6 +38,7 @@
       --muted: #9aa3ae;
       --accent: #7ea6ff;
       --accent-text: #0d1424;
+      --ok: #6fcf7f;
       --danger: #ff8a80;
       --danger-bg: #3a1d1c;
       --info-bg: #1b2840;
@@ -57,13 +59,14 @@
   }
   .wrap { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
   button, select, input { font: inherit; color: inherit; }
-  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* En-tête */
   header.top { background: var(--surface); border-bottom: 1px solid var(--border); }
   .top-inner { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; padding-block: 14px; }
   h1 { font-size: 1.25rem; margin: 0; letter-spacing: -.01em; }
-  .source { color: var(--muted); font-size: .875rem; margin-top: 2px; }
+  .source { color: var(--muted); font-size: .875rem; margin-top: 2px; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; }
+  .source .ok { color: var(--ok); font-weight: 500; }
+  .source .warn { color: var(--q2); font-weight: 500; }
   .actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .btn {
     border: 1px solid var(--border); background: var(--surface); border-radius: 6px;
@@ -72,7 +75,8 @@
   .btn:hover { background: var(--surface-2); }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
   .btn.primary:hover { filter: brightness(1.08); }
-  .btn:focus-visible, select:focus-visible, input:focus-visible, .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn.small { padding: 2px 10px; font-size: .8rem; }
+  .btn:focus-visible, select:focus-visible, input:focus-visible, .seg button:focus-visible, .check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* Bandeaux */
   .banner { margin-top: 16px; padding: 10px 14px; border-radius: var(--radius); border: 1px solid var(--border); font-size: .9rem; display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
@@ -133,12 +137,15 @@
   /* Kanban */
   .kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 6px; }
   .col { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; min-width: 0; }
+  .col.drop-target { outline: 2px dashed var(--accent); outline-offset: -2px; }
   .col-head { padding: 10px 12px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; }
   .col-head .count { font-size: 1rem; color: var(--muted); }
-  .col .list { padding: 0 8px 8px; display: grid; gap: 8px; align-content: start; }
+  .col .list { padding: 0 8px 8px; display: grid; gap: 8px; align-content: start; flex: 1; }
 
   /* Cartes */
   .card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--q4); border-radius: 6px; padding: 9px 11px; box-shadow: var(--shadow); min-width: 0; }
+  .card[draggable="true"] { cursor: grab; }
+  .card.dragging { opacity: .45; }
   .card.q1 { border-left-color: var(--q1); }
   .card.q2 { border-left-color: var(--q2); }
   .card.q3 { border-left-color: var(--q3); }
@@ -150,6 +157,16 @@
   .meta { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--muted); font-size: .8rem; margin-top: 4px; }
   .meta span { overflow-wrap: anywhere; }
   .comment { color: var(--muted); font-size: .8rem; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-foot { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .card-foot select { font-size: .8rem; padding: 3px 6px; border-radius: 5px; margin-left: auto; }
+  .check {
+    margin-left: auto; flex: none; width: 24px; height: 24px; border-radius: 50%; padding: 0;
+    border: 1.5px solid var(--border); background: transparent; color: transparent; cursor: pointer;
+    display: grid; place-items: center;
+  }
+  .check:hover { border-color: var(--ok); color: var(--ok); }
+  .check[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+  .check svg { width: 14px; height: 14px; }
   .tag { display: inline-block; border-radius: 4px; padding: 1px 6px; font-weight: 600; font-size: .75rem; line-height: 1.4; border: 1px solid var(--border); }
   .prio { background: var(--surface-2); }
   .prio.p1 { background: var(--q1); border-color: var(--q1); color: var(--surface); }
@@ -158,11 +175,20 @@
   .due.soon { color: var(--q2); font-weight: 600; }
   .due.overdue { color: var(--danger); font-weight: 650; }
   .flag { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); background: var(--danger-bg); }
-  .qtag { margin-top: 6px; }
   .qtag.q1 { color: var(--q1); background: var(--q1-bg); border-color: transparent; }
   .qtag.q2 { color: var(--q2); background: var(--q2-bg); border-color: transparent; }
   .qtag.q3 { color: var(--q3); background: var(--q3-bg); border-color: transparent; }
   .qtag.q4 { color: var(--q4); background: var(--q4-bg); border-color: transparent; }
+
+  /* Notification */
+  .toast {
+    position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 20;
+    max-width: calc(100% - 32px); display: flex; gap: 12px; align-items: center;
+    background: var(--text); color: var(--bg); border-radius: var(--radius); padding: 10px 14px; font-size: .9rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+  }
+  .toast span { overflow-wrap: anywhere; }
+  .toast button { background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 5px; padding: 2px 10px; cursor: pointer; font-weight: 600; flex: none; }
 
   /* Pied de page */
   footer { margin: 32px 0 24px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: .85rem; }
@@ -171,7 +197,7 @@
   footer li { margin: 2px 0; }
   footer .privacy { margin-top: 12px; }
 
-  /* Glisser-déposer */
+  /* Glisser-déposer de fichier */
   .drop {
     position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
     background: color-mix(in srgb, var(--bg) 85%, transparent); pointer-events: none;
@@ -249,17 +275,20 @@
       <li><strong>Reporter / abandonner</strong> : ni urgent ni important.</li>
     </ol>
     <p>Les actions au statut « Fait » sortent de la matrice. Les colonnes Urgent, Important et Quadrant du fichier Excel sont ignorées : tout est recalculé ici, à la date du jour.</p>
-    <p class="privacy">Confidentialité : le fichier est lu uniquement dans votre navigateur. Aucune donnée n'est envoyée sur un serveur ; elles sont seulement mémorisées dans le stockage local de ce navigateur, jusqu'à « Effacer les données ».</p>
+    <p>Changement de statut : menu sur chaque carte, bouton rond pour marquer « Fait », ou glisser-déposer entre les colonnes du Kanban. Sous Chrome ou Edge (ordinateur), le changement est écrit aussitôt dans la colonne Statut du fichier Excel, sans toucher au reste du classeur ; fermez le fichier dans Excel pendant ce temps.</p>
+    <p class="privacy">Confidentialité : le fichier est lu et modifié uniquement sur votre poste, dans votre navigateur. Aucune donnée n'est envoyée sur un serveur ; elles sont seulement mémorisées dans le stockage local de ce navigateur, jusqu'à « Effacer les données ».</p>
   </footer>
 </main>
 
 <div class="drop" id="drop" hidden><div>Déposez votre fichier Excel ici</div></div>
+<div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button type="button" id="toastUndo">Annuler</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script id="app">
 "use strict";
 
-/* ---------- Logique métier (sans DOM, testable) ---------- */
+/* ---------- Logique métier (sans DOM de page, testable) ---------- */
 const SDM = (() => {
   const norm = (s) => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "")
     .toLowerCase().replace(/\s+/g, " ").trim();
@@ -351,7 +380,10 @@ const SDM = (() => {
     if (!sheetName) {
       throw new Error(`Onglet « Actions » introuvable. Onglets présents : ${wb.SheetNames.join(", ") || "aucun"}.`);
     }
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: true, defval: "", blankrows: false });
+    const ws = wb.Sheets[sheetName];
+    // blankrows: true pour que l'indice de ligne corresponde à la ligne réelle de la feuille
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: "", blankrows: true });
+    const origin = ws["!ref"] ? XLSX.utils.decode_range(ws["!ref"]).s : { r: 0, c: 0 };
 
     // En-têtes attendus en ligne 1 ; on tolère quelques lignes de titre au-dessus.
     let h = rows.slice(0, 10).findIndex((r) => {
@@ -378,10 +410,12 @@ const SDM = (() => {
       const r = rows[i];
       const action = str(get(r, "action"));
       if (!action || norm(action).startsWith("(exemple)")) continue;
+      const row = origin.r + i;
       let echeance = parseDate(get(r, "echeance"));
-      if (echeance === undefined) { badDates.push(i + 1); echeance = null; }
+      if (echeance === undefined) { badDates.push(row + 1); echeance = null; }
       actions.push({
-        id: str(get(r, "id")) || String(i + 1),
+        id: str(get(r, "id")) || String(row + 1),
+        row,
         action,
         famille: canonicalFamily(get(r, "famille")),
         interlocuteur: str(get(r, "interlocuteur")),
@@ -399,7 +433,110 @@ const SDM = (() => {
       warnings.push(`Échéance illisible ignorée (ligne${badDates.length > 1 ? "s" : ""} ${badDates.join(", ")}). Format attendu : date Excel ou jj/mm/aaaa.`);
     }
     if (!actions.length) warnings.push("Aucune action trouvée dans l'onglet « Actions ».");
-    return { actions, warnings };
+    return { sheetName, statutCol: origin.c + col.statut, actions, warnings };
+  }
+
+  // Retrouve une action (même ID et même libellé, sinon libellé unique)
+  function findAction(actions, target) {
+    const exact = actions.find((a) => a.id === target.id && a.action === target.action);
+    if (exact) return exact;
+    const same = actions.filter((a) => a.action === target.action);
+    return same.length === 1 ? same[0] : null;
+  }
+
+  /* Écriture : modifie uniquement les cellules visées dans le XML de la feuille,
+     pour conserver mise en forme, listes déroulantes, formules et tableaux. */
+  const isZip = (b) => b && b.length > 4 && b[0] === 0x50 && b[1] === 0x4b;
+  const kids = (el, name) => Array.from(el.childNodes).filter((n) => n.nodeType === 1 && n.localName === name);
+  const attrLocal = (el, name) => {
+    for (const a of Array.from(el.attributes)) if (a.localName === name) return a.value;
+    return null;
+  };
+
+  async function patchXlsx(bytes, sheetName, cells) {
+    if (!isZip(bytes)) throw new Error("Seuls les fichiers .xlsx / .xlsm peuvent être modifiés (enregistrez le fichier .xls au format .xlsx).");
+    const zip = await JSZip.loadAsync(bytes);
+    const read = async (p) => {
+      const f = zip.file(p);
+      if (!f) throw new Error(`Classeur incomplet : ${p} introuvable.`);
+      const text = await f.async("string");
+      return { text, doc: new DOMParser().parseFromString(text, "application/xml") };
+    };
+    const write = (p, src, doc) => {
+      let out = new XMLSerializer().serializeToString(doc);
+      const decl = src.match(/^\s*<\?xml[^?]*\?>/);
+      if (decl && !out.startsWith("<?xml")) out = decl[0].trim() + "\n" + out;
+      zip.file(p, out);
+    };
+
+    const wb = await read("xl/workbook.xml");
+    const sheetEl = Array.from(wb.doc.getElementsByTagNameNS(wb.doc.documentElement.namespaceURI, "sheet"))
+      .find((s) => s.getAttribute("name") === sheetName);
+    if (!sheetEl) throw new Error(`Onglet « ${sheetName} » introuvable dans le classeur.`);
+    const rid = attrLocal(sheetEl, "id");
+    const rels = await read("xl/_rels/workbook.xml.rels");
+    const rel = Array.from(rels.doc.getElementsByTagNameNS(rels.doc.documentElement.namespaceURI, "Relationship"))
+      .find((r) => r.getAttribute("Id") === rid);
+    if (!rel) throw new Error("Classeur incomplet : feuille introuvable.");
+    const target = rel.getAttribute("Target").replace(/^\.\//, "");
+    const sheetPath = target.startsWith("/") ? target.slice(1) : "xl/" + target;
+
+    const sh = await read(sheetPath);
+    const doc = sh.doc;
+    const ns = doc.documentElement.namespaceURI;
+    const sheetData = doc.getElementsByTagNameNS(ns, "sheetData")[0];
+    const colsEl = doc.getElementsByTagNameNS(ns, "cols")[0];
+    for (const { row, col, value } of cells) {
+      const ref = XLSX.utils.encode_cell({ r: row, c: col });
+      let rowEl = null, beforeRow = null, rn = 0;
+      for (const el of kids(sheetData, "row")) {
+        rn = el.hasAttribute("r") ? +el.getAttribute("r") : rn + 1;
+        if (rn === row + 1) { rowEl = el; break; }
+        if (rn > row + 1) { beforeRow = el; break; }
+      }
+      if (!rowEl) {
+        rowEl = doc.createElementNS(ns, "row");
+        rowEl.setAttribute("r", String(row + 1));
+        sheetData.insertBefore(rowEl, beforeRow);
+      }
+      let cell = null, beforeCell = null, cn = -1;
+      for (const el of kids(rowEl, "c")) {
+        cn = el.hasAttribute("r") ? XLSX.utils.decode_cell(el.getAttribute("r")).c : cn + 1;
+        if (cn === col) { cell = el; break; }
+        if (cn > col) { beforeCell = el; break; }
+      }
+      if (!cell) {
+        cell = doc.createElementNS(ns, "c");
+        cell.setAttribute("r", ref);
+        const colDef = colsEl && kids(colsEl, "col").find((c) => +c.getAttribute("min") <= col + 1 && col + 1 <= +c.getAttribute("max"));
+        if (colDef && colDef.getAttribute("style")) cell.setAttribute("s", colDef.getAttribute("style"));
+        rowEl.insertBefore(cell, beforeCell);
+      }
+      if (kids(cell, "f").length) throw new Error(`La cellule ${ref} contient une formule : modification refusée.`);
+      while (cell.firstChild) cell.removeChild(cell.firstChild);
+      cell.setAttribute("t", "inlineStr");
+      const is = doc.createElementNS(ns, "is");
+      const t = doc.createElementNS(ns, "t");
+      t.textContent = value;
+      is.appendChild(t);
+      cell.appendChild(is);
+    }
+    write(sheetPath, sh.text, doc);
+
+    // Demande à Excel de recalculer les formules (Urgent, Important, Quadrant...) à l'ouverture
+    const wns = wb.doc.documentElement.namespaceURI;
+    let calcPr = wb.doc.getElementsByTagNameNS(wns, "calcPr")[0];
+    if (!calcPr) {
+      calcPr = wb.doc.createElementNS(wns, "calcPr");
+      const after = ["oleSize", "customWorkbookViews", "pivotCaches", "smartTagPr", "smartTagTypes",
+        "webPublishing", "fileRecoveryPr", "webPublishObjects", "extLst"];
+      const next = Array.from(wb.doc.documentElement.childNodes).find((n) => n.nodeType === 1 && after.includes(n.localName));
+      wb.doc.documentElement.insertBefore(calcPr, next || null);
+    }
+    calcPr.setAttribute("fullCalcOnLoad", "1");
+    write("xl/workbook.xml", wb.text, wb.doc);
+
+    return zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
   }
 
   const daysUntil = (isoDate, today) => Math.round((fromIso(isoDate) - today) / 86400000);
@@ -449,7 +586,7 @@ const SDM = (() => {
     ];
   }
 
-  return { norm, parseDate, parseWorkbook, classify, summarize, byDue, byQuadrantThenDue,
+  return { norm, parseDate, parseWorkbook, findAction, patchXlsx, isZip, classify, summarize, byDue, byQuadrantThenDue,
     exampleActions, startOfToday, fromIso, STATUSES, FAMILIES, QUADRANTS };
 })();
 
@@ -462,18 +599,51 @@ if (typeof document !== "undefined") (() => {
     set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } },
     del(k) { try { localStorage.removeItem(k); } catch { /* indisponible */ } },
   };
+  // IndexedDB : accès au fichier (Chrome/Edge) ou copie du fichier (autres navigateurs)
+  const idb = (() => {
+    let dbp;
+    const open = () => dbp ??= new Promise((res, rej) => {
+      const r = indexedDB.open("sdm-priorites", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("kv");
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    const run = async (mode, fn) => {
+      const db = await open();
+      return new Promise((res, rej) => {
+        const tx = db.transaction("kv", mode);
+        const req = fn(tx.objectStore("kv"));
+        tx.oncomplete = () => res(req.result);
+        tx.onerror = () => rej(tx.error);
+      });
+    };
+    return {
+      get: (k) => run("readonly", (s) => s.get(k)).catch(() => undefined),
+      set: (k, v) => run("readwrite", (s) => s.put(v, k)).then(() => true, () => false),
+      del: (k) => run("readwrite", (s) => s.delete(k)).catch(() => {}),
+    };
+  })();
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const fmtDate = (d) => d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const fmtTime = (d) => d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  const canPickFiles = typeof window.showOpenFilePicker === "function";
+  const RW = { mode: "readwrite" };
 
-  const state = { data: null, view: "matrix", family: "", showDone: false };
+  const state = {
+    data: null, view: "matrix", family: "", showDone: false,
+    example: SDM.exampleActions(SDM.startOfToday()),
+    handle: null, perm: null, bytes: null, pending: 0, lastSaved: null,
+  };
 
   try {
     const saved = JSON.parse(store.get(KEY_DATA) || "null");
     if (saved && Array.isArray(saved.actions)) state.data = saved;
   } catch { store.del(KEY_DATA); }
   if (store.get(KEY_VIEW) === "kanban") state.view = "kanban";
+
+  const persist = () => (state.data ? store.set(KEY_DATA, JSON.stringify(state.data)) : true);
 
   function showMessage(text, type = "error") {
     $("messageText").textContent = text;
@@ -482,6 +652,36 @@ if (typeof document !== "undefined") (() => {
   }
   const hideMessage = () => { $("message").hidden = true; };
 
+  let toastTimer;
+  function showToast(text, onUndo) {
+    $("toastText").textContent = text;
+    $("toastUndo").hidden = !onUndo;
+    $("toastUndo").onclick = () => { hideToast(); onUndo(); };
+    $("toast").hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 6000);
+  }
+  const hideToast = () => { $("toast").hidden = true; };
+
+  function errorText(e) {
+    const locked = "Le fichier est verrouillé, probablement ouvert dans Excel. Fermez-le puis réessayez.";
+    return ({
+      NoModificationAllowedError: locked,
+      InvalidStateError: locked,
+      NotReadableError: "Le fichier ne peut pas être lu (ouvert dans Excel, déplacé ou modifié ?). Fermez-le ou rechargez-le.",
+      NotFoundError: "Fichier introuvable : il a peut-être été déplacé ou renommé. Rechargez-le.",
+      NotAllowedError: "Autorisation de modifier le fichier refusée.",
+    })[e && e.name] || (e && e.message) || String(e);
+  }
+
+  function readWorkbook(bytes) {
+    if (typeof XLSX === "undefined" || typeof JSZip === "undefined") {
+      throw new Error("Les bibliothèques de lecture Excel n'ont pas pu être chargées. Vérifiez votre connexion Internet puis rechargez la page.");
+    }
+    return SDM.parseWorkbook(XLSX.read(bytes, { type: "array", cellDates: false }));
+  }
+
+  /* ----- Rendu ----- */
   function dueLabel(a) {
     if (a.days === null) return { text: "Sans échéance", cls: "" };
     const date = fmtDate(SDM.fromIso(a.echeance));
@@ -492,21 +692,28 @@ if (typeof document !== "undefined") (() => {
     return { text: date, cls: a.days <= 2 ? "soon" : "" };
   }
 
-  function card(a, withQuadrant) {
+  const CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function card(a, inKanban) {
     const due = dueLabel(a);
     const prio = a.priorite === "-" ? "" : `<span class="tag prio ${a.priorite.toLowerCase()}" title="Priorité">${a.priorite}</span>`;
     const meta = [a.famille, a.interlocuteur].filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("");
-    return `<article class="card q${a.quadrant}${a.done ? " is-done" : ""}">
-      <div class="card-top">${prio}<span class="due ${due.cls}">${esc(due.text)}</span>${a.bloquant && !a.done ? '<span class="tag flag">Bloquant</span>' : ""}</div>
+    const options = SDM.STATUSES.map((s) => `<option${s === a.statut ? " selected" : ""}>${esc(s)}</option>`).join("");
+    return `<article class="card q${a.quadrant}${a.done ? " is-done" : ""}" data-k="${a.k}"${inKanban ? ' draggable="true"' : ""}>
+      <div class="card-top">${prio}<span class="due ${due.cls}">${esc(due.text)}</span>${a.bloquant && !a.done ? '<span class="tag flag">Bloquant</span>' : ""}
+        <button type="button" class="check" data-act="done" aria-pressed="${a.done}" title="${a.done ? "Rouvrir l'action" : "Marquer comme fait"}" aria-label="${a.done ? "Rouvrir l'action" : "Marquer comme fait"}">${CHECK}</button></div>
       <h3 class="card-title">${esc(a.action)}</h3>
       ${meta ? `<div class="meta">${meta}</div>` : ""}
       ${a.commentaire ? `<div class="comment" title="${esc(a.commentaire)}">${esc(a.commentaire)}</div>` : ""}
-      ${withQuadrant ? `<span class="tag qtag q${a.quadrant}">${a.quadrant} · ${esc(SDM.QUADRANTS[a.quadrant].name)}</span>` : ""}
+      <div class="card-foot">
+        ${inKanban || a.done ? `<span class="tag qtag q${a.quadrant}">${a.quadrant} · ${esc(SDM.QUADRANTS[a.quadrant].name)}</span>` : ""}
+        <select data-act="status" aria-label="Statut de l'action">${options}</select>
+      </div>
     </article>`;
   }
 
-  const list = (items, withQuadrant) =>
-    items.length ? items.map((a) => card(a, withQuadrant)).join("") : '<div class="empty">Aucune action</div>';
+  const cards = (items, inKanban) =>
+    items.length ? items.map((a) => card(a, inKanban)).join("") : '<div class="empty">Aucune action</div>';
 
   function renderMatrix(items) {
     const open = items.filter((a) => !a.done);
@@ -515,7 +722,7 @@ if (typeof document !== "undefined") (() => {
       const Q = SDM.QUADRANTS[q];
       return `<section class="quad q${q}" aria-label="${esc(Q.name)}">
         <div class="quad-head"><h2>${q}. ${esc(Q.name)}<span class="sub">${esc(Q.sub)}</span></h2><span class="count">${its.length}</span></div>
-        <div class="list">${list(its, false)}</div>
+        <div class="list">${cards(its, false)}</div>
       </section>`;
     };
     let html = `<div class="matrix">
@@ -525,7 +732,7 @@ if (typeof document !== "undefined") (() => {
     </div>`;
     if (state.showDone) {
       const done = items.filter((a) => a.done).sort(SDM.byDue);
-      html += `<section class="done-section"><h2>Terminées (${done.length})</h2><div class="done-grid">${list(done, true)}</div></section>`;
+      html += `<section class="done-section"><h2>Terminées (${done.length})</h2><div class="done-grid">${cards(done, false)}</div></section>`;
     }
     return html;
   }
@@ -534,26 +741,41 @@ if (typeof document !== "undefined") (() => {
     const statuses = SDM.STATUSES.filter((s) => s !== "Fait" || state.showDone);
     return `<div class="kanban">${statuses.map((s) => {
       const its = items.filter((a) => a.statut === s).sort(SDM.byQuadrantThenDue);
-      return `<section class="col" aria-label="${esc(s)}">
+      return `<section class="col" data-status="${esc(s)}" aria-label="${esc(s)}">
         <div class="col-head"><span>${esc(s)}</span><span class="count">${its.length}</span></div>
-        <div class="list">${list(its, true)}</div>
+        <div class="list">${cards(its, true)}</div>
       </section>`;
     }).join("")}</div>`;
+  }
+
+  function renderSource() {
+    const d = state.data;
+    if (!d) return esc("Données d'exemple (aucun fichier chargé)");
+    const at = new Date(d.loadedAt);
+    const parts = [`<span>${esc(d.fileName)} · lu le ${fmtDate(at)} à ${fmtTime(at)}</span>`];
+    if (state.pending) parts.push('<span class="warn">Enregistrement…</span>');
+    if (state.handle) {
+      if (state.perm === "granted") {
+        if (!state.pending) parts.push(`<span class="ok">Enregistrement automatique dans le fichier${state.lastSaved ? ` · dernier à ${fmtTime(state.lastSaved)}` : ""}</span>`);
+      } else {
+        parts.push('<button type="button" class="btn small" data-act="reconnect">Autoriser la modification du fichier</button>');
+      }
+    } else if (state.bytes) {
+      if (d.dirty) parts.push('<span class="warn">Modifications non écrites dans le fichier</span><button type="button" class="btn small" data-act="download">Télécharger l\'Excel mis à jour</button>');
+    } else {
+      parts.push('<span class="warn">Lecture seule : rechargez le fichier pour pouvoir le modifier</span>');
+    }
+    return parts.join("");
   }
 
   function render() {
     const today = SDM.startOfToday();
     const isExample = !state.data;
-    const source = isExample ? SDM.exampleActions(today) : state.data.actions;
-    const items = source.map((a) => SDM.classify(a, today));
+    const source = isExample ? state.example : state.data.actions;
+    const items = source.map((a, k) => ({ ...SDM.classify(a, today), k }));
 
     $("exampleBanner").hidden = !isExample;
-    if (isExample) {
-      $("source").textContent = "Données d'exemple (aucun fichier chargé)";
-    } else {
-      const at = new Date(state.data.loadedAt);
-      $("source").textContent = `${state.data.fileName} · chargé le ${fmtDate(at)} à ${at.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
-    }
+    $("source").innerHTML = renderSource();
     $("btnClear").hidden = isExample;
 
     // Filtre famille : familles standard + celles présentes dans le fichier
@@ -575,45 +797,227 @@ if (typeof document !== "undefined") (() => {
     $("view").innerHTML = state.view === "kanban" ? renderKanban(filtered) : renderMatrix(filtered);
   }
 
-  async function loadFile(file) {
+  /* ----- Ouverture du fichier ----- */
+  async function openSource({ name, bytes, handle = null, lastModified = null }) {
     hideMessage();
+    let parsed;
+    try {
+      parsed = readWorkbook(bytes);
+    } catch (e) {
+      showMessage(`Impossible de lire « ${name} ». ${errorText(e)}`);
+      return;
+    }
+    state.handle = handle;
+    state.bytes = handle ? null : bytes;
+    state.lastSaved = null;
+    state.perm = handle ? await handle.queryPermission(RW).catch(() => "prompt") : null;
+    state.data = {
+      fileName: name, loadedAt: new Date().toISOString(), lastModified,
+      sheetName: parsed.sheetName, statutCol: parsed.statutCol, actions: parsed.actions, dirty: false,
+    };
+    if (handle) { await idb.set("handle", handle); idb.del("bytes"); }
+    else { await idb.set("bytes", bytes); idb.del("handle"); }
+
+    const notes = [...parsed.warnings];
+    if (!persist()) notes.push("Les données n'ont pas pu être mémorisées dans ce navigateur : il faudra recharger le fichier à la prochaine ouverture.");
+    if (!SDM.isZip(bytes)) notes.push("Format .xls : les changements de statut ne pourront pas être écrits dans ce fichier. Enregistrez-le au format .xlsx.");
+    else if (!handle) notes.push("Ce navigateur ne peut pas modifier directement le fichier : les changements de statut seront à télécharger. Avec Chrome ou Edge sur ordinateur, ils sont écrits automatiquement dans le fichier.");
+    if (notes.length) showMessage(notes.join(" "), "info");
+    render();
+  }
+
+  async function openHandle(handle) {
+    try {
+      const file = await handle.getFile();
+      if (!/\.(xlsx|xlsm|xls)$/i.test(file.name)) {
+        showMessage(`« ${file.name} » n'est pas un fichier Excel (.xlsx attendu).`);
+        return;
+      }
+      await openSource({ name: file.name, bytes: new Uint8Array(await file.arrayBuffer()), handle, lastModified: file.lastModified });
+    } catch (e) {
+      showMessage(`Impossible d'ouvrir le fichier. ${errorText(e)}`);
+    }
+  }
+
+  async function openFile(file) {
     if (!file) return;
     if (!/\.(xlsx|xlsm|xls)$/i.test(file.name)) {
       showMessage(`« ${file.name} » n'est pas un fichier Excel (.xlsx attendu).`);
       return;
     }
-    if (typeof XLSX === "undefined") {
-      showMessage("La bibliothèque de lecture Excel (SheetJS) n'a pas pu être chargée. Vérifiez votre connexion Internet puis rechargez la page.");
-      return;
-    }
-    let result;
+    await openSource({ name: file.name, bytes: new Uint8Array(await file.arrayBuffer()), lastModified: file.lastModified });
+  }
+
+  // Relit le fichier s'il a été modifié dans Excel (Chrome/Edge, accès autorisé)
+  async function refreshFromHandle(force) {
+    if (!state.handle || !state.data || state.pending || state.perm !== "granted") return;
     try {
-      const wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: "array", cellDates: false });
-      result = SDM.parseWorkbook(wb);
+      const file = await state.handle.getFile();
+      if (!force && file.lastModified === state.data.lastModified) return;
+      const parsed = readWorkbook(new Uint8Array(await file.arrayBuffer()));
+      Object.assign(state.data, {
+        fileName: file.name, loadedAt: new Date().toISOString(), lastModified: file.lastModified,
+        sheetName: parsed.sheetName, statutCol: parsed.statutCol, actions: parsed.actions,
+      });
+      persist();
+      render();
     } catch (e) {
-      showMessage(`Impossible de lire « ${file.name} ». ${e && e.message ? e.message : e}`);
-      return;
+      showMessage(`Impossible de relire « ${state.data.fileName} ». ${errorText(e)}`);
     }
-    state.data = { fileName: file.name, loadedAt: new Date().toISOString(), actions: result.actions };
-    const saved = store.set(KEY_DATA, JSON.stringify(state.data));
-    const notes = [...result.warnings];
-    if (!saved) notes.push("Les données n'ont pas pu être mémorisées dans ce navigateur : il faudra recharger le fichier à la prochaine ouverture.");
-    if (notes.length) showMessage(notes.join(" "), "info");
+  }
+
+  /* ----- Changement de statut et écriture dans le fichier ----- */
+  async function ensurePermission(handle) {
+    if ((await handle.queryPermission(RW)) === "granted") return true;
+    return (await handle.requestPermission(RW)) === "granted";
+  }
+
+  async function writeStatus(target, status, permission) {
+    let bytes;
+    if (state.handle) {
+      if (!(await permission)) throw Object.assign(new Error(), { name: "NotAllowedError" });
+      state.perm = "granted";
+      const file = await state.handle.getFile();
+      bytes = new Uint8Array(await file.arrayBuffer());
+    } else if (state.bytes) {
+      bytes = state.bytes;
+    } else {
+      throw new Error("Le fichier n'est plus disponible dans ce navigateur : rechargez-le pour enregistrer vos modifications.");
+    }
+    // On relit toujours la version actuelle du fichier, pour ne pas écraser une modification faite dans Excel
+    const parsed = readWorkbook(bytes);
+    const fa = SDM.findAction(parsed.actions, target);
+    if (!fa) {
+      throw Object.assign(new Error(`Action « ${target.action} » introuvable dans le fichier (modifiée ou supprimée entre-temps ?).`), { parsed });
+    }
+    const out = await SDM.patchXlsx(bytes, parsed.sheetName, [{ row: fa.row, col: parsed.statutCol, value: status }]);
+    let lastModified = state.data.lastModified;
+    if (state.handle) {
+      const w = await state.handle.createWritable();
+      try {
+        await w.write(out);
+        await w.close();
+      } catch (e) {
+        try { await w.abort(); } catch { /* déjà fermé */ }
+        throw e;
+      }
+      lastModified = (await state.handle.getFile()).lastModified;
+    } else {
+      state.bytes = out;
+      await idb.set("bytes", out);
+    }
+    fa.statut = status;
+    return { parsed, lastModified };
+  }
+
+  let queue = Promise.resolve();
+  function setStatus(target, status, undoable = true) {
+    const list = state.data ? state.data.actions : state.example;
+    const a = SDM.findAction(list, target);
+    if (!a || a.statut === status) return;
+    const prev = a.statut;
+    a.statut = status;
+    hideMessage();
+    if (undoable) {
+      const label = a.action.length > 50 ? a.action.slice(0, 49) + "…" : a.action;
+      showToast(`« ${label} » : ${status}${state.data ? "" : " (exemple, non enregistré)"}`, () => setStatus(target, prev, false));
+    }
+    if (!state.data) { render(); return; }
+
+    persist();
+    // La demande d'autorisation doit partir pendant le clic de l'utilisateur
+    const permission = state.handle ? ensurePermission(state.handle).catch(() => false) : null;
+    state.pending++;
+    render();
+    queue = queue.then(() => writeStatus(target, status, permission)).then(({ parsed, lastModified }) => {
+      state.pending--;
+      state.lastSaved = new Date();
+      if (!state.handle) state.data.dirty = true;
+      if (!state.pending) Object.assign(state.data, { actions: parsed.actions, sheetName: parsed.sheetName, statutCol: parsed.statutCol, lastModified });
+      persist();
+      render();
+    }, (e) => {
+      state.pending--;
+      if (e && e.name === "NotAllowedError") state.perm = "prompt";
+      if (e && e.parsed && !state.pending) {
+        state.data.actions = e.parsed.actions;
+      } else {
+        const cur = SDM.findAction(state.data.actions, target);
+        if (cur && cur.statut === status) cur.statut = prev;
+      }
+      persist();
+      hideToast();
+      showMessage(`Statut non enregistré. ${errorText(e)}`);
+      render();
+    });
+  }
+
+  const targetOf = (el) => {
+    const c = el.closest(".card");
+    if (!c) return null;
+    const a = (state.data ? state.data.actions : state.example)[+c.dataset.k];
+    return a ? { id: a.id, action: a.action, statut: a.statut } : null;
+  };
+
+  function downloadUpdated() {
+    if (!state.bytes || !state.data) return;
+    const url = URL.createObjectURL(new Blob([state.bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = state.data.fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    state.data.dirty = false;
+    persist();
     render();
   }
 
-  // Événements
-  $("btnLoad").addEventListener("click", () => $("fileInput").click());
-  $("fileInput").addEventListener("change", (e) => { loadFile(e.target.files[0]); e.target.value = ""; });
+  /* ----- Événements ----- */
+  $("btnLoad").addEventListener("click", async () => {
+    if (!canPickFiles) { $("fileInput").click(); return; }
+    let handle;
+    try {
+      [handle] = await window.showOpenFilePicker({
+        types: [{ description: "Classeur Excel", accept: {
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+          "application/vnd.ms-excel.sheet.macroEnabled.12": [".xlsm"],
+          "application/vnd.ms-excel": [".xls"],
+        } }],
+        excludeAcceptAllOption: false,
+      });
+    } catch (e) {
+      if (e && e.name !== "AbortError") $("fileInput").click();
+      return;
+    }
+    await openHandle(handle);
+  });
+  $("fileInput").addEventListener("change", (e) => { openFile(e.target.files[0]); e.target.value = ""; });
   $("btnClear").addEventListener("click", () => {
-    if (!confirm("Effacer les données mémorisées dans ce navigateur ?")) return;
+    if (!confirm("Effacer les données mémorisées dans ce navigateur ? Le fichier Excel n'est pas modifié.")) return;
     store.del(KEY_DATA);
     store.del(KEY_VIEW);
-    state.data = null;
+    idb.del("handle");
+    idb.del("bytes");
+    Object.assign(state, { data: null, handle: null, perm: null, bytes: null, lastSaved: null });
     hideMessage();
     render();
   });
   $("messageClose").addEventListener("click", hideMessage);
+  $("source").addEventListener("click", async (e) => {
+    const act = e.target.closest("[data-act]")?.dataset.act;
+    if (act === "download") downloadUpdated();
+    if (act === "reconnect" && state.handle) {
+      try {
+        state.perm = (await state.handle.requestPermission(RW));
+      } catch (err) {
+        showMessage(errorText(err));
+      }
+      if (state.perm === "granted") await refreshFromHandle(true);
+      render();
+    }
+  });
   document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
     state.view = b.dataset.view;
     store.set(KEY_VIEW, state.view);
@@ -622,24 +1026,92 @@ if (typeof document !== "undefined") (() => {
   $("familyFilter").addEventListener("change", (e) => { state.family = e.target.value; render(); });
   $("showDone").addEventListener("change", (e) => { state.showDone = e.target.checked; render(); });
 
-  // Glisser-déposer n'importe où
+  // Actions sur les cartes
+  $("view").addEventListener("change", (e) => {
+    if (e.target.dataset.act !== "status") return;
+    const t = targetOf(e.target);
+    if (t) setStatus(t, e.target.value);
+  });
+  $("view").addEventListener("click", (e) => {
+    const btn = e.target.closest('[data-act="done"]');
+    if (!btn) return;
+    const t = targetOf(btn);
+    if (t) setStatus(t, t.statut === "Fait" ? "À faire" : "Fait");
+  });
+
+  // Kanban : glisser une carte vers une autre colonne
+  const CARD_TYPE = "application/x-sdm-card";
+  $("view").addEventListener("dragstart", (e) => {
+    const c = e.target.closest && e.target.closest('.card[draggable="true"]');
+    if (!c) return;
+    e.dataTransfer.setData(CARD_TYPE, c.dataset.k);
+    e.dataTransfer.effectAllowed = "move";
+    c.classList.add("dragging");
+  });
+  $("view").addEventListener("dragend", (e) => {
+    e.target.classList && e.target.classList.remove("dragging");
+    document.querySelectorAll(".col.drop-target").forEach((c) => c.classList.remove("drop-target"));
+  });
+  $("view").addEventListener("dragover", (e) => {
+    const col = e.target.closest(".col");
+    if (!col || ![...e.dataTransfer.types].includes(CARD_TYPE)) return;
+    e.preventDefault();
+    document.querySelectorAll(".col.drop-target").forEach((c) => c !== col && c.classList.remove("drop-target"));
+    col.classList.add("drop-target");
+  });
+  $("view").addEventListener("drop", (e) => {
+    const col = e.target.closest(".col");
+    const k = e.dataTransfer.getData(CARD_TYPE);
+    if (!col || k === "") return;
+    e.preventDefault();
+    col.classList.remove("drop-target");
+    const a = (state.data ? state.data.actions : state.example)[+k];
+    if (a) setStatus({ id: a.id, action: a.action }, col.dataset.status);
+  });
+
+  // Glisser-déposer d'un fichier n'importe où
   let dragDepth = 0;
   const hasFiles = (e) => e.dataTransfer && [...e.dataTransfer.types].includes("Files");
   window.addEventListener("dragenter", (e) => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; $("drop").hidden = false; });
   window.addEventListener("dragover", (e) => { if (hasFiles(e)) e.preventDefault(); });
-  window.addEventListener("dragleave", () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("drop").hidden = true; });
+  window.addEventListener("dragleave", (e) => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("drop").hidden = true; });
   window.addEventListener("drop", (e) => {
     if (!hasFiles(e)) return;
     e.preventDefault();
     dragDepth = 0;
     $("drop").hidden = true;
-    loadFile(e.dataTransfer.files[0]);
+    const item = e.dataTransfer.items && e.dataTransfer.items[0];
+    const file = e.dataTransfer.files[0];
+    // Chrome/Edge : récupérer un accès au fichier pour pouvoir y écrire
+    const handleP = item && item.getAsFileSystemHandle ? item.getAsFileSystemHandle() : null;
+    if (!handleP) { openFile(file); return; }
+    handleP.then((h) => (h && h.kind === "file" ? openHandle(h) : openFile(file)), () => openFile(file));
   });
 
-  // Recalcul au changement de jour si l'onglet reste ouvert
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
+  // Au retour sur l'onglet : relecture si le fichier a changé, et recalcul des échéances
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    render();
+    refreshFromHandle(false);
+  });
 
   render();
+  (async () => {
+    if (!state.data) return;
+    const handle = await idb.get("handle");
+    if (handle && typeof handle.queryPermission === "function") {
+      state.handle = handle;
+      state.perm = await handle.queryPermission(RW).catch(() => "prompt");
+      render();
+      await refreshFromHandle(false);
+    } else {
+      const bytes = await idb.get("bytes");
+      if (bytes) { state.bytes = bytes; render(); }
+    }
+  })();
+
+  // Accès pour les tests automatisés
+  window.SDMApp = { openHandle, state };
 })();
 </script>
 </body>
